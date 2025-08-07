@@ -14,4 +14,17 @@
 		<PackageReference Include="MudBlazor" Version="8.10.0" />
 	</ItemGroup>
 
+	<Target Name="CopyIndexHtmlBasedOnConfiguration" BeforeTargets="Build">
+		<Message Text="Copiando el archivo index.html para la configuración $(Configuration)..." Importance="high" />
+		<Copy
+			Condition=" '$(Configuration)' == 'Debug' "
+			SourceFiles="wwwroot/index.debug.html"
+			DestinationFiles="wwwroot/index.html"
+			OverwriteReadOnlyFiles="true" />
+		<Copy
+			Condition=" '$(Configuration)' == 'Release' "
+			SourceFiles="wwwroot/index.release.html"
+			DestinationFiles="wwwroot/index.html"
+			OverwriteReadOnlyFiles="true" />
+	</Target>
 </Project>
