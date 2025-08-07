@@ -5,7 +5,7 @@
 
 <MudThemeProvider />
 
-<MudContainer MaxWidth="MaxWidth.Large" Class="mt-8">
+<MudContainer MaxWidth="MaxWidth.Large" Class="pa-4 pa-md-8">
     <MudGrid Spacing="4">
 
         @* COLUMNA IZQUIERDA: INPUTS DEL USUARIO *@
@@ -26,16 +26,16 @@
                     <MudText Typo="Typo.body2" Style="color: inherit;">@((MarkupString)calculated.AlertMessage)</MudText>
                 </MudAlert>
 
-                <MudNumericField @bind-Value="inputs.AnosHipoteca" @bind-Value:after="Recalculate" Label="Años de Hipoteca" Variant="Variant.Outlined" />
-                <MudSlider @bind-Value="inputs.AnosHipoteca" @bind-Value:after="Recalculate" Min="5" Max="40" Class="my-4" />
+                <MudNumericField @bind-Value="inputs.AnosHipoteca" @bind-Value:after="Recalculate" Label="Años de Hipoteca" Variant="Variant.Outlined" Class="mt-4" />
+                <MudSlider @bind-Value="inputs.AnosHipoteca" @bind-Value:after="Recalculate" Min="5" Max="40" Class="my-2 d-none d-sm-flex" />
 
-                <MudNumericField @bind-Value="inputs.TipoInteresAnual" @bind-Value:after="Recalculate" Label="Interés hipoteca TAE (%)" Variant="Variant.Outlined" Format="F2" Step="0.1" />
-                <MudSlider @bind-Value="inputs.TipoInteresAnual" @bind-Value:after="Recalculate" Min="0.00" Max="10.00" Step="0.1" Class="my-4" />
+                <MudNumericField @bind-Value="inputs.TipoInteresAnual" @bind-Value:after="Recalculate" Label="Interés hipoteca TAE (%)" Variant="Variant.Outlined" Format="F2" Step="0.1" Class="mt-4" />
+                <MudSlider @bind-Value="inputs.TipoInteresAnual" @bind-Value:after="Recalculate" Min="0.00" Max="10.00" Step="0.1" Class="my-2 d-none d-sm-flex" />
 
-                <MudNumericField @bind-Value="inputs.ImpuestosCompra" @bind-Value:after="Recalculate" Label="Impuestos de Compra (ITP, etc.) (%)" Variant="Variant.Outlined" Format="F2" />
-                <MudSlider @bind-Value="inputs.ImpuestosCompra" @bind-Value:after="Recalculate" Min="0.00" Max="20.00" Step="0.5" Class="my-2" />
+                <MudNumericField @bind-Value="inputs.ImpuestosCompra" @bind-Value:after="Recalculate" Label="Impuestos de Compra (ITP, etc.) (%)" Variant="Variant.Outlined" Format="F2" Class="mt-4" />
+                <MudSlider @bind-Value="inputs.ImpuestosCompra" @bind-Value:after="Recalculate" Min="0.00" Max="20.00" Step="0.5" Class="my-2 d-none d-sm-flex" />
 
-                <MudNumericField @bind-Value="inputs.GastosFijosCompra" @bind-Value:after="Recalculate" Label="Gastos Fijos de Compra" Variant="Variant.Outlined" Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Filled.Euro" HelperText="Notaría, registro, gestoría, etc." Step="100" />
+                <MudNumericField @bind-Value="inputs.GastosFijosCompra" @bind-Value:after="Recalculate" Label="Gastos Fijos de Compra" Variant="Variant.Outlined" Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Filled.Euro" HelperText="Notaría, registro, gestoría, etc." Step="100" Class="mt-4" />
             </MudPaper>
         </MudItem>
 
