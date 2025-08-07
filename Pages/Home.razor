@@ -13,7 +13,7 @@
             <MudPaper Class="pa-4" Elevation="3">
                 <MudText Typo="Typo.h5" GutterBottom="true">Datos de la Hipoteca</MudText>
 
-                <MudNumericField @bind-Value="inputs.PrecioVivienda" @bind-Value:after="Recalculate" Label="Precio de la Vivienda" Variant="Variant.Outlined" Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Filled.Euro" Step="1000"/>
+                <MudNumericField @bind-Value="inputs.PrecioVivienda" @bind-Value:after="() => RecalculateAsync()" Label="Precio de la Vivienda" Variant="Variant.Outlined" Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Filled.Euro" Step="1000"/>
                 <div class="my-4">
                     <MudButtonGroup Variant="Variant.Outlined" FullWidth="true" OverrideStyles="false">
                         <MudButton OnClick="@(() => SetDownPaymentPercentage( 0.10m ))">10%</MudButton>
@@ -21,21 +21,21 @@
                         <MudButton OnClick="@(() => SetDownPaymentPercentage( 0.30m ))">30%</MudButton>
                     </MudButtonGroup>
                 </div>
-                <MudNumericField @bind-Value="inputs.AportacionInicial" @bind-Value:after="Recalculate" Label="Aportación Inicial (Efectivo)" Variant="Variant.Outlined" Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Filled.Euro" HelperText="Dinero total que aportas (cubre costes + entrada)." Step="1000" />
+                <MudNumericField @bind-Value="inputs.AportacionInicial" @bind-Value:after="() => RecalculateAsync()" Label="Aportación Inicial (Efectivo)" Variant="Variant.Outlined" Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Filled.Euro" HelperText="Dinero total que aportas (cubre costes + entrada)." Step="1000" />
                 <MudAlert Severity="@calculated.AlertSeverity" ShowCloseIcon="false" Class="mb-4" Dense="true">
                     <MudText Typo="Typo.body2" Style="color: inherit;">@((MarkupString)calculated.AlertMessage)</MudText>
                 </MudAlert>
 
-                <MudNumericField @bind-Value="inputs.AnosHipoteca" @bind-Value:after="Recalculate" Label="Años de Hipoteca" Variant="Variant.Outlined" Class="mt-4" />
-                <MudSlider @bind-Value="inputs.AnosHipoteca" @bind-Value:after="Recalculate" Min="5" Max="40" Class="my-2 d-none d-sm-flex" />
+                <MudNumericField @bind-Value="inputs.AnosHipoteca" @bind-Value:after="() => RecalculateAsync()" Label="Años de Hipoteca" Variant="Variant.Outlined" Class="mt-4" />
+                <MudSlider @bind-Value="inputs.AnosHipoteca" @bind-Value:after="() => RecalculateAsync()" Min="5" Max="40" Class="my-2 d-none d-sm-flex" />
 
-                <MudNumericField @bind-Value="inputs.TipoInteresAnual" @bind-Value:after="Recalculate" Label="Interés hipoteca TAE (%)" Variant="Variant.Outlined" Format="F2" Step="0.1" Class="mt-4" />
-                <MudSlider @bind-Value="inputs.TipoInteresAnual" @bind-Value:after="Recalculate" Min="0.00" Max="10.00" Step="0.1" Class="my-2 d-none d-sm-flex" />
+                <MudNumericField @bind-Value="inputs.TipoInteresAnual" @bind-Value:after="() => RecalculateAsync()" Label="Interés hipoteca TAE (%)" Variant="Variant.Outlined" Format="F2" Step="0.1" Class="mt-4" />
+                <MudSlider @bind-Value="inputs.TipoInteresAnual" @bind-Value:after="() => RecalculateAsync()" Min="0.00" Max="10.00" Step="0.1" Class="my-2 d-none d-sm-flex" />
 
-                <MudNumericField @bind-Value="inputs.ImpuestosCompra" @bind-Value:after="Recalculate" Label="Impuestos de Compra (ITP, etc.) (%)" Variant="Variant.Outlined" Format="F2" Class="mt-4" />
-                <MudSlider @bind-Value="inputs.ImpuestosCompra" @bind-Value:after="Recalculate" Min="0.00" Max="20.00" Step="0.5" Class="my-2 d-none d-sm-flex" />
+                <MudNumericField @bind-Value="inputs.ImpuestosCompra" @bind-Value:after="() => RecalculateAsync()" Label="Impuestos de Compra (ITP, etc.) (%)" Variant="Variant.Outlined" Format="F2" Class="mt-4" />
+                <MudSlider @bind-Value="inputs.ImpuestosCompra" @bind-Value:after="() => RecalculateAsync()" Min="0.00" Max="20.00" Step="0.5" Class="my-2 d-none d-sm-flex" />
 
-                <MudNumericField @bind-Value="inputs.GastosFijosCompra" @bind-Value:after="Recalculate" Label="Gastos Fijos de Compra" Variant="Variant.Outlined" Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Filled.Euro" HelperText="Notaría, registro, gestoría, etc." Step="100" Class="mt-4" />
+                <MudNumericField @bind-Value="inputs.GastosFijosCompra" @bind-Value:after="() => RecalculateAsync()" Label="Gastos Fijos de Compra" Variant="Variant.Outlined" Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Filled.Euro" HelperText="Notaría, registro, gestoría, etc." Step="100" Class="mt-4" />
             </MudPaper>
         </MudItem>
 
@@ -70,13 +70,20 @@
     private MortgageInputs inputs = new MortgageInputs();
     private MortgageCalculations calculated = new MortgageCalculations();
     private System.Globalization.CultureInfo es = new System.Globalization.CultureInfo( "es-ES" );
+    private bool isLoading = true; // Flag para evitar guardados innecesarios al inicio
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        Recalculate();
+        var savedInputs = await localStorage.GetItemAsync<MortgageInputs>( "mortgageInputs" );
+        if ( savedInputs != null )
+        {
+            inputs = savedInputs;
+        }
+        isLoading = false;
+        await RecalculateAsync( isInitialLoad: true );
     }
 
-    private void SetDownPaymentPercentage( decimal targetTotalPercentage )
+    private async Task SetDownPaymentPercentage( decimal targetTotalPercentage )
     {
         if ( inputs.PrecioVivienda > 0 )
         {
@@ -93,23 +100,11 @@
             decimal totalCashOutlay = purchaseCosts + requiredNetDownPayment;
             inputs.AportacionInicial = Math.Round( totalCashOutlay );
 
-            Recalculate();
+            await RecalculateAsync();
         }
     }
 
-    // private void SetDownPaymentPercentage( decimal netPercentage )
-    // {
-    //     if ( inputs.PrecioVivienda > 0 )
-    //     {
-    //         decimal purchaseCosts = (inputs.PrecioVivienda * ((decimal)inputs.ImpuestosCompra / 100)) + inputs.GastosFijosCompra;
-    //         decimal requiredNetDownPayment = inputs.PrecioVivienda * netPercentage;
-    //         decimal totalCashOutlay = purchaseCosts + requiredNetDownPayment;
-    //         inputs.AportacionInicial = Math.Round( totalCashOutlay );
-    //         Recalculate();
-    //     }
-    // }
-
-    private void Recalculate()
+    private async Task RecalculateAsync( bool isInitialLoad = false )
     {
         // --- Cálculos de costes y aportación ---
         calculated.CostesTotalesCompra = (inputs.PrecioVivienda * ((decimal)inputs.ImpuestosCompra / 100)) + inputs.GastosFijosCompra;
@@ -119,7 +114,6 @@
         // --- Lógica de la alerta ---
         if ( inputs.PrecioVivienda > 0 )
         {
-            // CORREGIDO: La lógica de la alerta ahora se basa en la Entrada Neta vs el Precio de la Vivienda
             var netDownPaymentPercentage = calculated.EntradaNeta / inputs.PrecioVivienda;
             string baseMessage = $"Tu entrada neta equivale al <strong>{netDownPaymentPercentage:P1}</strong> del precio. ";
 
@@ -128,19 +122,14 @@
                 calculated.AlertMessage = "¡Error! La aportación inicial no cubre los costes de compra.";
                 calculated.AlertSeverity = Severity.Error;
             }
-            else if ( netDownPaymentPercentage < 0.1m )
-            {
-                calculated.AlertMessage = baseMessage + "Atención: Aportas menos del 10% del coste total, lo que puede ser arriesgado.";
-                calculated.AlertSeverity = Severity.Warning;
-            }
             else if ( netDownPaymentPercentage < 0.2m )
             {
-                calculated.AlertMessage = baseMessage + "Nota: Estás en un rango razonable, pero por debajo del 20% recomendado.";
-                calculated.AlertSeverity = Severity.Info;
+                calculated.AlertMessage = baseMessage + "Nota: Estás por debajo del 20% recomendado, una posición de mayor riesgo.";
+                calculated.AlertSeverity = Severity.Warning;
             }
             else
             {
-                calculated.AlertMessage = baseMessage + "¡Excelente! Aportas más del 20% del coste total, una posición muy sólida.";
+                calculated.AlertMessage = baseMessage + "¡Excelente! Superas el 20% de entrada neta, una posición muy sólida.";
                 calculated.AlertSeverity = Severity.Success;
             }
         }
@@ -154,6 +143,11 @@
         decimal totalPayments = calculated.PagoMensualHipoteca * inputs.AnosHipoteca * 12;
         calculated.CosteTotalIntereses = (calculated.ImportePrestamo > 0) ? totalPayments - calculated.ImportePrestamo : 0;
         calculated.CosteTotalConIntereses = calculated.CosteTotalVivienda + calculated.CosteTotalIntereses;
+
+        if ( !isLoading && !isInitialLoad )
+        {
+            await localStorage.SetItemAsync( "mortgageInputs", inputs );
+        }
 
         StateHasChanged();
     }
